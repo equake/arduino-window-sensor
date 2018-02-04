@@ -80,6 +80,9 @@ void setup() {
   //  pinMode(D7, INPUT);
   //  pinMode(D8, INPUT);
     dht.begin();
+
+    leftWindowAverage.reset(50);
+    rightWindowAverage.reset(50);
 }
 
 
