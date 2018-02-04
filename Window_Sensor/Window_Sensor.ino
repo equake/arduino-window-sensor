@@ -170,18 +170,18 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
   int FullClosedLeft = 90; // distance between sensor and glass window when is close.
 
   if (RightSensor >= FullClosedRight)
-    RightSensor = rightWindowAverage.update(0);
+    RightOpen = rightWindowAverage.update(0);
   else if (RightSensor <= FullOpenedRight)
-    RightSensor = rightWindowAverage.update(100);
+    RightOpen = rightWindowAverage.update(100);
   else
-    RightSensor = rightWindowAverage.update(map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100));
+    RightOpen = rightWindowAverage.update(map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100));
 
   if (LeftSensor >= FullClosedLeft)
-    LeftSensor = leftWindowAverage.update(0);
+    LeftOpen = leftWindowAverage.update(0);
   else if (LeftSensor <= FullOpenedLeft)
-    LeftSensor = leftWindowAverage.update(100);
+    LeftOpen = leftWindowAverage.update(100);
   else
-    LeftSensor = leftWindowAverage.update(map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100));
+    LeftOpen = leftWindowAverage.update(map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100));
 }
 
 
