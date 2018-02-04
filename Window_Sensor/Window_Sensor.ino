@@ -1,54 +1,91 @@
+#include <ESP8266WiFi.h>   //https://github.com/esp8266/Arduino
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
+#include <WiFiClient.h>
 #include <DHT.h>
 
-/*
-  Blink
+bool debug = true; // :(
 
-  Turns an LED on for one second, then off for one second, repeatedly.
+// Sonar Sensor Right 
+#define TRIGGERR D5 // Trigger Right Sensor
+#define ECHO D6 // //echo Right Sensor
 
-  Most Arduinos have an on-board LED you can control. On the UNO, MEGA and ZERO
-  it is attached to digital pin 13, on MKR1000 on pin 6. LED_BUILTIN is set to
-  the correct LED pin independent of which board is used.
-  If you want to know what pin the on-board LED is connected to on your Arduino
-  model, check the Technical Specs of your board at:
-  https://www.arduino.cc/en/Main/Products
+// Sonar Sensor Left
+#define TRIGGERL D1 // Trigger Left Sensor
+#define ECHO2 D2  // echo Left Sensor
 
-  modified 8 May 2014
-  by Scott Fitzgerald
-  modified 2 Sep 2016
-  by Arturo Guadalupi
-  modified 8 Sep 2016
-  by Colby Newman
+// variables of Sonar Sensors
+long duration, distance, RightSensor, LeftSensor;
+int RightOpen;
+int LeftOpen;
 
-  This example code is in the public domain.
-
-  http://www.arduino.cc/en/Tutorial/Blink
-*/
-
-#define TRIGGER D6
-#define ECHO D7
-
+// Constant and variables of Light Sensor
+int AnalogInput = A0; // Input Light Sensor
+long MinLight = 900;
+long MaxLight = 100;
+char *Lamp = "On";  
 DHT dht(D3, DHT11);
+
 volatile boolean closed = false;
 
-// the setup function runs once when you press reset or power the board
-void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
-//  attachInterrupt(D7, door_event, CHANGE);
-//  attachInterrupt(D7, door_opened, FALLING);
-  pinMode(D4, OUTPUT);
-  pinMode(D7, INPUT);
-  dht.begin();
 
-  pinMode(TRIGGER, OUTPUT);
-  pinMode(ECHO, INPUT);
+void setup() {
   
-  Serial.begin(115200);
+   // put your setup code here, to run once:
+   Serial.begin(115200);
+   Serial.println();
+
+   ESP8266WebServer server(80);
+
+    //WiFiManager
+    //Local intialization. Once its business is done, there is no need to keep it around
+    WiFiManager wifiManager;
+    //reset saved settings
+    //wifiManager.resetSettings();
+    
+    //set custom ip for portal
+    //wifiManager.setAPStaticIPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
+    
+       //for some reason that I can't understood why at my home, I only have sucess to connect to wifi AP using the code below :(
+    if(!wifiManager.autoConnect("Window_Sensor")) {
+      Serial.println("failed to connect, we should reset as see if it connects");
+      delay(3000);
+      ESP.reset();
+      delay(5000);
+    }
+  
+    wifiManager.autoConnect("Window_Sensor");
+
+    Serial.println("local ip");
+    Serial.println(WiFi.localIP());
+
+    //  if (debug) {
+        Serial.println("");
+        Serial.print("Connected to ");
+        Serial.println(WiFi.SSID());
+        Serial.print("IP address: ");
+        Serial.println(WiFi.localIP());
+    //  }
+
+       /* Initialize PIN Modes Sonar Sensors*/
+    pinMode(TRIGGERR, OUTPUT);  // Trigger Right Sensor
+    pinMode(ECHO, INPUT); // Echo Right Sensor
+    pinMode(TRIGGERL, OUTPUT); // Trigger Left Sensor
+    pinMode(ECHO2, INPUT); // Echo Left Sensor
+
+   // pinMode(D4, OUTPUT);
+  //  pinMode(D7, INPUT);
+  //  pinMode(D8, INPUT);
+    dht.begin();
 }
+
 
 // the loop function runs over and over again forever
 void loop() {
+  
   Serial.print("Luminosity: ");
-  Serial.println(analogRead(A0));
+  Serial.println(analogRead(AnalogInput));
 
   float h = dht.readHumidity();
   // Read temperature as Celsius (the default)
@@ -80,30 +117,94 @@ void loop() {
   Serial.print(" *C ");
   Serial.print(hif);
   Serial.println(" *F");
-
-//  Serial.print("Closed? ");
-////  Serial.println(closed);
-//  Serial.println(digitalRead(D7));
-
-
-  long duration, distance;
-//  digitalWrite(TRIGGER, LOW);  
-//  delayMicroseconds(2); 
+  //Serial.println("Fuck!!!");
   
-  digitalWrite(TRIGGER, HIGH);
-  delayMicroseconds(10); 
+
+  // Call Sonar Sensor function
+  // Right Sensor
+  SonarSensor(TRIGGERR, ECHO);
+  RightSensor = distance;
+  // Left Sensor
+  SonarSensor(TRIGGERL, ECHO2);
+  LeftSensor = distance;
+
+ 
   
-  digitalWrite(TRIGGER, LOW);
-  duration = pulseIn(ECHO, HIGH);
+  Serial.print("Centimeter Left:"); 
+  Serial.println(LeftSensor);
+  Serial.print("Centimeter Right:");
+  Serial.println(RightSensor);
+  
+  WindowSonarSensor(RightSensor, LeftSensor);
+  Serial.print("Status Lamina Esquerda:"); 
+  Serial.println(LeftOpen);
+  Serial.print("Status Lamina Direita:");
+  Serial.println(RightOpen);
+
+  LightSensor(analogRead(AnalogInput));
+  Serial.print("Status Lâmpada:"); 
+  Serial.println(Lamp);
+}
+
+
+void SonarSensor(int trigPin,int echoPin){
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
   distance = (duration/2) / 29.1;
-  
-  Serial.print("Centimeter:");
-  Serial.println(distance);
-
   delay(1000);
 }
 
-void door_event() {
-//  Serial.println(":D");
-  closed = digitalRead(D7);
+void WindowSonarSensor(long RightSensor, long LeftSensor){
+  int FullOpenedRight = 5; // distance between sensor and glass window when is open ;o)
+  int FullClosedRight = 110; // distance between sensor and glass window when is close. 
+  int FullOpenedLeft = 5; // distance between wall and glass window when is open ;o)
+  int FullClosedLeft = 90; // distance between sensor and glass window when is close.
+
+  if (RightSensor >= 0) {
+    Serial.print("Right Sensor:"); 
+    Serial.println(RightSensor);
+      if (RightSensor == FullOpenedRight){
+         RightOpen = 100;
+      }
+      else if(RightSensor == FullClosedRight) {
+        RightOpen = 0;
+      }else{
+        RightOpen = RightSensor - (FullClosedRight - FullOpenedRight);
+      }
+  }
+
+  if (LeftSensor >=0) {
+     Serial.print("Left Sensor:"); 
+     Serial.println(LeftSensor);
+      if (LeftSensor == FullOpenedLeft){
+        LeftOpen = 100;
+      }
+      else if(LeftSensor == FullClosedLeft) {
+        LeftOpen = 0;
+      }else{
+        LeftOpen = LeftSensor - (FullClosedLeft - FullOpenedLeft);
+      }
+  }
+    
 }
+
+
+void LightSensor(long AnalogInput) {
+  if(AnalogInput > 0) {
+      if(AnalogInput <= MaxLight) {
+        Lamp = "On";
+      }else{
+        Lamp = "Off";
+      }
+    }else {
+        Lamp = "Sensor not working";
+     }
+}
+ 
+
+
+
