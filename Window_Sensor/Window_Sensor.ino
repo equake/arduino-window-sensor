@@ -109,7 +109,7 @@ void Thermometer() {
   float t = dht.readTemperature();
 
   // Check if any reads failed and exit early (to try again).
-  if (isnan(h) || isnan(t) || isnan(f)) {
+  if (isnan(h) || isnan(t)) {
     Serial.println("Failed to read from DHT sensor!");
     return;
   }
@@ -122,7 +122,7 @@ void Thermometer() {
   send_data("home/balcony/bedroom/heat_index", hic);
 }
 
-void SonarSensor(int trigPin,int echoPin) {
+float SonarSensor(int trigPin,int echoPin) {
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
