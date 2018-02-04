@@ -171,26 +171,14 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
   else if (RightSensor <= FullOpenedRight)
     RightSensor = rightWindowAverage.update(100);
   else
-<<<<<<< HEAD
-    tmpRightOpen = map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100);
-  rightWindowAverage.add(tmpRightOpen);
-  RightSensor = rightWindowAverage.process();
-=======
     RightSensor = rightWindowAverage.update(map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100));
->>>>>>> 5821a36ff5b60900c42be894708c48fb32160615
 
   if (LeftSensor >= FullClosedLeft)
     LeftSensor = leftWindowAverage.update(0);
   else if (LeftSensor <= FullOpenedLeft)
     LeftSensor = leftWindowAverage.update(100);
   else
-<<<<<<< HEAD
-    tmpLeftOpen = map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100);
-  leftWindowAverage.add(tmpLeftOpen);
-  LeftSensor = leftWindowAverage.process();   
-=======
     LeftSensor = leftWindowAverage.update(map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100));
->>>>>>> 5821a36ff5b60900c42be894708c48fb32160615
 }
 
 
