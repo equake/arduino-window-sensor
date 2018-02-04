@@ -98,7 +98,7 @@ void setup() {
 void loop() {
   LightSensor(lightAverage.update(analogRead(AnalogInput)));
   Thermometer();
-  WindowSonarSensor(RightSensor, LeftSensor);
+  WindowSonarSensor();
   delay(1000);
 }
 
