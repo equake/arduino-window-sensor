@@ -153,7 +153,7 @@ void SonarSensor(int trigPin,int echoPin){
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
   distance = (duration/2) / 29.1;
-  delay(1000);
+  delay(100);
 }
 
 void WindowSonarSensor(long RightSensor, long LeftSensor){
