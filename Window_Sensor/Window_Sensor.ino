@@ -4,11 +4,10 @@
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <WiFiClient.h>
 #include <DHT.h>
-#include <LinkedList.h>
-#include <GaussianAverage.h>
+#include <MovingAverage.h>
 
-GaussianAverage leftWindowAverage = GaussianAverage(10);
-GaussianAverage rightWindowAverage = GaussianAverage(10);
+MovingAverage leftWindowAverage(10);
+MovingAverage rightWindowAverage(10);
 
 bool debug = true; // :(
 
@@ -167,25 +166,31 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
   int FullOpenedLeft = 5; // distance between wall and glass window when is open ;o)
   int FullClosedLeft = 90; // distance between sensor and glass window when is close.
 
-  int tmpRightOpen;
   if (RightSensor >= FullClosedRight)
-    tmpRightOpen = 0;
+    RightSensor = rightWindowAverage.update(0);
   else if (RightSensor <= FullOpenedRight)
-    tmpRightOpen = 100;
+    RightSensor = rightWindowAverage.update(100);
   else
+<<<<<<< HEAD
     tmpRightOpen = map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100);
   rightWindowAverage.add(tmpRightOpen);
   RightSensor = rightWindowAverage.process();
+=======
+    RightSensor = rightWindowAverage.update(map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100));
+>>>>>>> 5821a36ff5b60900c42be894708c48fb32160615
 
-  int tmpLeftOpen;
   if (LeftSensor >= FullClosedLeft)
-    tmpLeftOpen = 0;
+    LeftSensor = leftWindowAverage.update(0);
   else if (LeftSensor <= FullOpenedLeft)
-    tmpLeftOpen = 100;
+    LeftSensor = leftWindowAverage.update(100);
   else
+<<<<<<< HEAD
     tmpLeftOpen = map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100);
   leftWindowAverage.add(tmpLeftOpen);
   LeftSensor = leftWindowAverage.process();   
+=======
+    LeftSensor = leftWindowAverage.update(map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100));
+>>>>>>> 5821a36ff5b60900c42be894708c48fb32160615
 }
 
 
