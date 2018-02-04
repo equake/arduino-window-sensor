@@ -55,8 +55,6 @@ void setup() {
       delay(5000);
     }
   
-    wifiManager.autoConnect("Window_Sensor");
-
     Serial.println("local ip");
     Serial.println(WiFi.localIP());
 
@@ -167,10 +165,10 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
   if (RightSensor >= 0) {
     Serial.print("Right Sensor:"); 
     Serial.println(RightSensor);
-      if (RightSensor == FullOpenedRight){
+      if (RightSensor <= FullOpenedRight){
          RightOpen = 100;
       }
-      else if(RightSensor == FullClosedRight) {
+      else if(RightSensor >= FullClosedRight) {
         RightOpen = 0;
       }else{
         RightOpen = RightSensor - (FullClosedRight - FullOpenedRight);
@@ -180,10 +178,10 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
   if (LeftSensor >=0) {
      Serial.print("Left Sensor:"); 
      Serial.println(LeftSensor);
-      if (LeftSensor == FullOpenedLeft){
+      if (LeftSensor <= FullOpenedLeft){
         LeftOpen = 100;
       }
-      else if(LeftSensor == FullClosedLeft) {
+      else if(LeftSensor >= FullClosedLeft) {
         LeftOpen = 0;
       }else{
         LeftOpen = LeftSensor - (FullClosedLeft - FullOpenedLeft);
