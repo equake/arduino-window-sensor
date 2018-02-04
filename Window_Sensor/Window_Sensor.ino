@@ -162,34 +162,19 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
   int FullOpenedLeft = 5; // distance between wall and glass window when is open ;o)
   int FullClosedLeft = 90; // distance between sensor and glass window when is close.
 
-  RightOpen = map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100);
-  LeftOpen = map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100);
+  if (RightSensor >= FullClosedRight)
+    RightOpen = 0;
+  else if (RightSensor <= FullOpenedRight)
+    RightOpen = 100;
+  else
+    RightOpen = map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100);
 
-  // if (RightSensor >= 0) {
-  //   Serial.print("Right Sensor:"); 
-  //   Serial.println(RightSensor);
-  //     if (RightSensor <= FullOpenedRight){
-  //        RightOpen = 100;
-  //     }
-  //     else if(RightSensor >= FullClosedRight) {
-  //       RightOpen = 0;
-  //     }else{
-  //       RightOpen = RightSensor - (FullClosedRight - FullOpenedRight);
-  //     }
-  // }
-
-  // if (LeftSensor >=0) {
-  //    Serial.print("Left Sensor:"); 
-  //    Serial.println(LeftSensor);
-  //     if (LeftSensor <= FullOpenedLeft){
-  //       LeftOpen = 100;
-  //     }
-  //     else if(LeftSensor >= FullClosedLeft) {
-  //       LeftOpen = 0;
-  //     }else{
-  //       LeftOpen = LeftSensor - (FullClosedLeft - FullOpenedLeft);
-  //     }
-  // }
+  if (LeftSensor >= FullClosedLeft)
+    LeftOpen = 0;
+  else if (LeftSensor <= FullOpenedLeft)
+    LeftOpen = 100;
+  else
+    LeftOpen = map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100);
     
 }
 
