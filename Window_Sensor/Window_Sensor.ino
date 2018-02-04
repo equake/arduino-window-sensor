@@ -91,7 +91,7 @@ void setup() {
 
     mqttClient.begin("192.168.16.181", netClient);
     Serial.print("\nconnecting to MQTT...");
-    while (!client.connect("window_sensor")) {
+    while (!mqttClient.connect("window_sensor")) {
       Serial.print(".");
       delay(1000);
     }
