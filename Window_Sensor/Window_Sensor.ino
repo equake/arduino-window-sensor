@@ -135,10 +135,7 @@ void loop() {
   Serial.print(" *C ");
   Serial.print(hif);
   Serial.println(" *F");
-  //Serial.println("Fuck!!!");
-
-  mqttClient.publish("hello/bla", "world");
-  
+  //Serial.println("Fuck!!!");  
 
   // Call Sonar Sensor function
   // Right Sensor
@@ -150,16 +147,16 @@ void loop() {
 
  
   
-  Serial.print("Centimeter Left:"); 
-  Serial.println(LeftSensor);
-  Serial.print("Centimeter Right:");
-  Serial.println(RightSensor);
+  // Serial.print("Centimeter Left:"); 
+  // Serial.println(LeftSensor);
+  // Serial.print("Centimeter Right:");
+  // Serial.println(RightSensor);
   
   WindowSonarSensor(RightSensor, LeftSensor);
-  Serial.print("Status Lamina Esquerda:"); 
-  Serial.println(LeftOpen);
-  Serial.print("Status Lamina Direita:");
-  Serial.println(RightOpen);
+  // Serial.print("Status Lamina Esquerda:"); 
+  // Serial.println(LeftOpen);
+  // Serial.print("Status Lamina Direita:");
+  // Serial.println(RightOpen);
 
   LightSensor(lightAverage.update(analogRead(AnalogInput)));
   Serial.print("Status Lâmpada:"); 
@@ -184,19 +181,25 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
   int FullOpenedLeft = 5; // distance between wall and glass window when is open ;o)
   int FullClosedLeft = 90; // distance between sensor and glass window when is close.
 
+  int RightOpen = 0;
   if (RightSensor >= FullClosedRight)
     RightOpen = rightWindowAverage.update(0);
   else if (RightSensor <= FullOpenedRight)
     RightOpen = rightWindowAverage.update(100);
   else
     RightOpen = rightWindowAverage.update(map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100));
+  send_data("home/bedroom/window/right/meters", RightSensor);
+  send_data("home/bedroom/window/right/percentage", RightOpen);
 
+  int LeftOpen = 0;
   if (LeftSensor >= FullClosedLeft)
     LeftOpen = leftWindowAverage.update(0);
   else if (LeftSensor <= FullOpenedLeft)
     LeftOpen = leftWindowAverage.update(100);
   else
     LeftOpen = leftWindowAverage.update(map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100));
+  send_data("home/bedroom/window/left/meters", LeftSensor);
+  send_data("home/bedroom/window/left/percentage", LeftOpen);
 }
 
 
@@ -213,5 +216,13 @@ void LightSensor(long analogInputValue) {
 }
  
 
+void send_data(String topic, long data) {
+  send_data(topic, String(data));
+}
 
-
+void send_data(String topic, String data) {
+  Serial.print(topic);
+  Serial.print(":");
+  Serial.println(data);
+  mqttClient.publish(topic, data);
+}
