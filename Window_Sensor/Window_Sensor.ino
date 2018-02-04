@@ -174,7 +174,7 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
     tmpRightOpen = 100;
   else
     tmpRightOpen = map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100);
-  rightWindowAverage.add(tmpRightOpen)
+  rightWindowAverage.add(tmpRightOpen);
   RightSensor = rightWindowAverage.process();
 
   int tmpLeftOpen;
@@ -184,7 +184,7 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
     tmpLeftOpen = 100;
   else
     tmpLeftOpen = map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100);
-  leftWindowAverage.add(tmpLeftOpen)
+  leftWindowAverage.add(tmpLeftOpen);
   LeftSensor = leftWindowAverage.process();   
 }
 
