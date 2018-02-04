@@ -24,11 +24,6 @@ bool debug = true; // :(
 #define TRIGGERL D1 // Trigger Left Sensor
 #define ECHO2 D2  // echo Left Sensor
 
-// variables of Sonar Sensors
-long duration, distance, RightSensor, LeftSensor;
-int RightOpen;
-int LeftOpen;
-
 // Constant and variables of Light Sensor
 int AnalogInput = A0; // Input Light Sensor
 long MinLight = 900;
@@ -101,15 +96,17 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
-  
-  Serial.print("Luminosity: ");
-  Serial.println(analogRead(AnalogInput));
+  LightSensor(lightAverage.update(analogRead(AnalogInput)));
+  Thermometer();
+  WindowSonarSensor(RightSensor, LeftSensor);
+  delay(1000);
+}
 
+
+void Thermometer() {
   float h = dht.readHumidity();
   // Read temperature as Celsius (the default)
   float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
-  float f = dht.readTemperature(true);
 
   // Check if any reads failed and exit early (to try again).
   if (isnan(h) || isnan(t) || isnan(f)) {
@@ -117,69 +114,35 @@ void loop() {
     return;
   }
 
-  // Compute heat index in Fahrenheit (the default)
-  float hif = dht.computeHeatIndex(f, h);
   // Compute heat index in Celsius (isFahreheit = false)
   float hic = dht.computeHeatIndex(t, h, false);
-
-  Serial.print("Humidity: ");
-  Serial.print(h);
-  Serial.print(" %\t");
-  Serial.print("Temperature: ");
-  Serial.print(t);
-  Serial.print(" *C ");
-  Serial.print(f);
-  Serial.print(" *F\t");
-  Serial.print("Heat index: ");
-  Serial.print(hic);
-  Serial.print(" *C ");
-  Serial.print(hif);
-  Serial.println(" *F");
-  //Serial.println("Fuck!!!");  
-
-  // Call Sonar Sensor function
-  // Right Sensor
-  SonarSensor(TRIGGERR, ECHO);
-  RightSensor = distance;
-  // Left Sensor
-  SonarSensor(TRIGGERL, ECHO2);
-  LeftSensor = distance;
-
- 
   
-  // Serial.print("Centimeter Left:"); 
-  // Serial.println(LeftSensor);
-  // Serial.print("Centimeter Right:");
-  // Serial.println(RightSensor);
-  
-  WindowSonarSensor(RightSensor, LeftSensor);
-  // Serial.print("Status Lamina Esquerda:"); 
-  // Serial.println(LeftOpen);
-  // Serial.print("Status Lamina Direita:");
-  // Serial.println(RightOpen);
-
-  LightSensor(lightAverage.update(analogRead(AnalogInput)));
-  Serial.print("Status Lâmpada:"); 
-  Serial.println(Lamp);
+  send_data("home/balcony/bedroom/humidity", h);
+  send_data("home/balcony/bedroom/temperature", t);
+  send_data("home/balcony/bedroom/heat_index", hic);
 }
 
-
-void SonarSensor(int trigPin,int echoPin){
+void SonarSensor(int trigPin,int echoPin) {
   digitalWrite(trigPin, LOW);
   delayMicroseconds(2);
   digitalWrite(trigPin, HIGH);
   delayMicroseconds(10);
   digitalWrite(trigPin, LOW);
-  duration = pulseIn(echoPin, HIGH);
-  distance = (duration/2) / 29.1;
-  delay(100);
+  long duration = pulseIn(echoPin, HIGH);
+  return (duration/2) / 29.1;
 }
 
-void WindowSonarSensor(long RightSensor, long LeftSensor){
+void WindowSonarSensor(){
   int FullOpenedRight = 5; // distance between sensor and glass window when is open ;o)
   int FullClosedRight = 110; // distance between sensor and glass window when is close. 
   int FullOpenedLeft = 5; // distance between wall and glass window when is open ;o)
   int FullClosedLeft = 90; // distance between sensor and glass window when is close.
+
+  // Right Sensor
+  long RightSensor = SonarSensor(TRIGGERR, ECHO);
+
+  // Left Sensor
+  long LeftSensor = SonarSensor(TRIGGERL, ECHO2);
 
   int RightOpen = 0;
   if (RightSensor >= FullClosedRight)
@@ -188,7 +151,7 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
     RightOpen = rightWindowAverage.update(100);
   else
     RightOpen = rightWindowAverage.update(map(RightSensor, FullClosedRight, FullOpenedLeft, 0, 100));
-  send_data("home/bedroom/window/right/meters", RightSensor);
+  send_data("home/bedroom/window/right/centimeters", RightSensor);
   send_data("home/bedroom/window/right/percentage", RightOpen);
 
   int LeftOpen = 0;
@@ -198,21 +161,22 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
     LeftOpen = leftWindowAverage.update(100);
   else
     LeftOpen = leftWindowAverage.update(map(LeftSensor, FullClosedLeft, FullOpenedLeft, 0, 100));
-  send_data("home/bedroom/window/left/meters", LeftSensor);
+  send_data("home/bedroom/window/left/centimeters", LeftSensor);
   send_data("home/bedroom/window/left/percentage", LeftOpen);
 }
 
 
 void LightSensor(long analogInputValue) {
+  send_data("home/balcony/bedroom/light/raw", analogInputValue);
   if(analogInputValue > 0) {
       if(analogInputValue <= MaxLight) {
-        Lamp = "On";
+        send_data("home/balcony/bedroom/light", "true");
       }else{
-        Lamp = "Off";
+        send_data("home/balcony/bedroom/light", "false");
       }
-    }else {
-        Lamp = "Sensor not working";
-     }
+    } else {
+      send_data("home/balcony/bedroom/light", "???");
+    }
 }
  
 
