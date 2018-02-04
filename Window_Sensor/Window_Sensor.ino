@@ -137,7 +137,7 @@ void loop() {
   Serial.println(" *F");
   //Serial.println("Fuck!!!");
 
-  client.publish("hello/bla", "world");
+  mqttClient.publish("hello/bla", "world");
   
 
   // Call Sonar Sensor function
