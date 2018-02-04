@@ -5,10 +5,14 @@
 #include <WiFiClient.h>
 #include <DHT.h>
 #include <MovingAverage.h>
+#include <MQTTClient.h>
+
 
 MovingAverage leftWindowAverage(10);
 MovingAverage rightWindowAverage(10);
 MovingAverage lightAverage(10);
+MQTTClient mqttClient;
+WiFiClient netClient;
 
 bool debug = true; // :(
 
@@ -84,6 +88,14 @@ void setup() {
 
     leftWindowAverage.reset(50);
     rightWindowAverage.reset(50);
+
+    mqttClient.begin("192.168.16.181", netClient);
+    Serial.print("\nconnecting to MQTT...");
+    while (!client.connect("window_sensor")) {
+      Serial.print(".");
+      delay(1000);
+    }
+
 }
 
 
@@ -124,6 +136,8 @@ void loop() {
   Serial.print(hif);
   Serial.println(" *F");
   //Serial.println("Fuck!!!");
+
+  client.publish("hello/bla", "world");
   
 
   // Call Sonar Sensor function
