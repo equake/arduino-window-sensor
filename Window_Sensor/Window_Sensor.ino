@@ -8,6 +8,7 @@
 
 MovingAverage leftWindowAverage(10);
 MovingAverage rightWindowAverage(10);
+MovingAverage lightAverage(10);
 
 bool debug = true; // :(
 
@@ -146,7 +147,7 @@ void loop() {
   Serial.print("Status Lamina Direita:");
   Serial.println(RightOpen);
 
-  LightSensor(analogRead(AnalogInput));
+  LightSensor(lightAverage.update(analogRead(AnalogInput)));
   Serial.print("Status Lâmpada:"); 
   Serial.println(Lamp);
 }
@@ -185,9 +186,9 @@ void WindowSonarSensor(long RightSensor, long LeftSensor){
 }
 
 
-void LightSensor(long AnalogInput) {
-  if(AnalogInput > 0) {
-      if(AnalogInput <= MaxLight) {
+void LightSensor(long analogInputValue) {
+  if(analogInputValue > 0) {
+      if(analogInputValue <= MaxLight) {
         Lamp = "On";
       }else{
         Lamp = "Off";
