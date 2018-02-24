@@ -1,3 +1,6 @@
 {
-    "port": "/dev/cu.wchusbserial1410"
+    "port": "/dev/cu.wchusbserial1410",
+    "board": "esp8266com:esp8266:d1_mini",
+    "configuration": "CpuFrequency=80,UploadSpeed=921600,FlashSize=4M3M",
+    "sketch": "Window_Sensor.ino"
 }
