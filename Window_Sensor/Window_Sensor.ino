@@ -31,12 +31,12 @@ WiFiClient netClient;
 bool debug = true; // :(
 
 // Sonar Sensor Right 
-#define TRIGGERR D5 // Trigger Right Sensor
-#define ECHO D6 // //echo Right Sensor
+#define TRIGGERR D1 //D5 // Trigger Right Sensor
+#define ECHO  D2 //D6 // //echo Right Sensor
 
 // Sonar Sensor Left
-#define TRIGGERL D1 // Trigger Left Sensor
-#define ECHO2 D2  // echo Left Sensor
+#define TRIGGERL D5 //D1 // Trigger Left Sensor
+#define ECHO2 D6 //D2  // echo Left Sensor
 
 // Constant and variables of Light Sensor
 int AnalogInput = A0; // Input Light Sensor
@@ -165,9 +165,6 @@ strcpy(max_light, custom_max_light.getValue());
     pinMode(TRIGGERL, OUTPUT); // Trigger Left Sensor
     pinMode(ECHO2, INPUT); // Echo Left Sensor
 
-   // pinMode(D4, OUTPUT);
-  //  pinMode(D7, INPUT);
-  //  pinMode(D8, INPUT);
     dht.begin();
 
     leftWindowAverage.reset(50);
@@ -223,10 +220,10 @@ float SonarSensor(int trigPin,int echoPin) {
 }
 
 void WindowSonarSensor(){
-  int FullOpenedRight = 5; // distance between sensor and glass window when is open ;o)
-  int FullClosedRight = 110; // distance between sensor and glass window when is close. 
-  int FullOpenedLeft = 5; // distance between wall and glass window when is open ;o)
-  int FullClosedLeft = 90; // distance between sensor and glass window when is close.
+  int FullOpenedRight = 2; // distance between sensor and glass window when is open ;o)
+  int FullClosedRight = 51; // distance between sensor and glass window when is close. 
+  int FullOpenedLeft = 2; // distance between wall and glass window when is open ;o)
+  int FullClosedLeft = 78; // distance between sensor and glass window when is close.
 
   // Right Sensor
   long RightSensor = SonarSensor(TRIGGERR, ECHO);
