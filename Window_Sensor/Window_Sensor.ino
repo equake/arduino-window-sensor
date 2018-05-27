@@ -4,14 +4,18 @@
 #include <ESP8266WebServer.h>
 #include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 #include <WiFiClient.h>
-#include <ArduinoJson.h> 
+#include <ArduinoJson.h>         //https://github.com/bblanchon/ArduinoJson
 #include <DHT.h>
 #include <MovingAverage.h> // TO DO: fazer movingAverage funcionar com ESP8266 2.4
 #include <MQTTClient.h>
 
 //define your default values here, if there are different values in config.json, they are overwritten.
-char mqtt_server[40];
+char mqtt_server[40] = "192.168.1.105";
 char mqtt_port[6] = "1883";
+//default custom static IP of IP for window_sensor
+//char static_ip[16] = "192.168.1.104";
+//char static_gw[16] = "191.168.1.1";
+//char static_sn[16] = "255.255.255.0";
 
 //flag for saving data
 bool shouldSaveConfig = false;
@@ -28,23 +32,22 @@ MovingAverage lightAverage(10);
 MQTTClient mqttClient;
 WiFiClient netClient;
 
-bool debug = true; // :(
+bool debug = true;
 
 // Sonar Sensor Right 
-#define TRIGGERR D1 //D5 // Trigger Right Sensor
-#define ECHO  D2 //D6 // //echo Right Sensor
+#define TRIGGERR D1 // Trigger Right Sensor
+#define ECHO  D2 //echo Right Sensor
 
 // Sonar Sensor Left
-#define TRIGGERL D5 //D1 // Trigger Left Sensor
-#define ECHO2 D6 //D2  // echo Left Sensor
+#define TRIGGERL D5 // Tr
 
-// Constant and variables of Light Sensor
-int AnalogInput = A0; // Input Light Sensor
-char max_light[4] = "600";
-//char *Lamp = "On";  
+#define ECHO2 D6 // echo 
+
+
+// Constant and variables
+int AnalogInput = A0; // 
+char max_light[4] = "30";
 DHT dht(D3, DHT11);
-
-volatile boolean closed = false;
 
 void setup() {
   
@@ -53,12 +56,12 @@ void setup() {
    Serial.println();
 
    //clean FS, for testing
-  //SPIFFS.format();
+   //SPIFFS.format();
 
   //read configuration from FS json
   Serial.println("mounting FS...");
 
-  if (SPIFFS.begin()) {
+    if (SPIFFS.begin()) {
     Serial.println("mounted file system");
     if (SPIFFS.exists("/config.json")) {
       //file exists, reading and loading
@@ -101,44 +104,44 @@ void setup() {
 
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
+  WiFiManager wifiManager;//default custom static IP
+
   //reset saved settings
   //wifiManager.resetSettings();
 
   //set config save notify callback
   wifiManager.setSaveConfigCallback(saveConfigCallback);
-    
-    
+
  //add all your parameters here
   wifiManager.addParameter(&custom_mqtt_server);
   wifiManager.addParameter(&custom_mqtt_port);
   wifiManager.addParameter(&custom_max_light);
 
-//for some reason that I can't understood why at my home, I only have sucess to connect to wifi AP using the code below :(
-  if(!wifiManager.autoConnect("Window_Sensor")) {
+  //for some reason that I can't understood why at my home, I only have sucess to connect to wifi AP using the code below :(
+  if(!wifiManager.autoConnect("window_sensor")) {
     Serial.println("failed to connect, we should reset as see if it connects");
     delay(3000);
     ESP.reset();
     delay(5000);
   }
   
-Serial.println("local ip");
-Serial.println(WiFi.localIP());
-
-if (debug) {
-  Serial.println("");
-  Serial.print("Connected to ");
-  Serial.println(WiFi.SSID());
-  Serial.print("IP address: ");
+  Serial.println("local ip:");
   Serial.println(WiFi.localIP());
-  //if you get here you have connected to the WiFi
-  Serial.println("connected...yeey :)");    
-}
 
-//read updated parameters
-strcpy(mqtt_server, custom_mqtt_server.getValue());
-strcpy(mqtt_port, custom_mqtt_port.getValue());
-strcpy(max_light, custom_max_light.getValue());
+  if (debug) {
+    Serial.println("");
+    Serial.print("Connected to:"); 
+    Serial.println(WiFi.SSID());
+    Serial.print("IP address: ");
+    Serial.println(WiFi.localIP());
+    //if you get here you have connected to the WiFi
+    Serial.println("connected...yeey :)");    
+  }
+
+  //read updated parameters (if applicable)
+  strcpy(mqtt_server, custom_mqtt_server.getValue());
+  strcpy(mqtt_port, custom_mqtt_port.getValue());
+  strcpy(max_light, custom_max_light.getValue());
 
   //save the custom parameters to FS
   if (shouldSaveConfig) {
@@ -170,12 +173,18 @@ strcpy(max_light, custom_max_light.getValue());
     leftWindowAverage.reset(50);
     rightWindowAverage.reset(50);
 
-    Serial.print("MQTT Server:");
+    Serial.print("MQTT Server:"); 
     Serial.println(mqtt_server);
-    Serial.print("MQTT Port");
+    Serial.print("MQTT Port:");
     Serial.println(mqtt_port);
-    //Serial.print("MAX Light:");
-    //Serial.println(max_light);
+    Serial.println("Local ip: ");
+    Serial.println(WiFi.localIP());
+    Serial.print("Gateway:");
+    Serial.println(WiFi.gatewayIP());
+    Serial.print("subnetMask:");
+    Serial.println(WiFi.subnetMask());
+    Serial.print("MAX Light:");
+    Serial.println(max_light);
 
     mqttClient.begin(mqtt_server, netClient);
     Serial.print("\nconnecting to MQTT...");
@@ -184,6 +193,7 @@ strcpy(max_light, custom_max_light.getValue());
       delay(1000);
     }
 }
+
 // the loop function runs over and over again forever
 void loop() {
   LightSensor(lightAverage.update(analogRead(AnalogInput)));

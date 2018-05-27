@@ -3,13 +3,16 @@
         {
             "name": "Mac",
             "includePath": [
-                "/Users/rogerio/Library/Arduino15/packages/esp8266/hardware/esp8266/2.4.0/cores/esp8266",
-                "/Users/rogerio/Documents/Arduino/libraries"
+                "~/.arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries",
+                "/Users/rogerio/Documents/Arduino/libraries",
+                "/usr/include/X11/fonts",
+                "/home/rogerio/.arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WebServer/src",
+                "/home/rogerio/.arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries/ESP8266WiFi/src"
             ],
             "browse": {
                 "limitSymbolsToIncludedHeaders": false,
                 "path": [
-                    "/Users/rogerio/Library/Arduino15/packages/esp8266/hardware/esp8266/2.4.0/cores/esp8266",
+                    "~/.arduino15/packages/esp8266/hardware/esp8266/2.3.0/libraries",
                     "/Users/rogerio/Documents/Arduino/libraries"
                 ]
             },
@@ -23,5 +26,5 @@
             "cppStandard": "c++17"
         }
     ],
-    "version": 3
+    "version": 4
 }
