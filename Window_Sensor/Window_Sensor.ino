@@ -104,7 +104,7 @@ void setup() {
 
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;//default custom static IP
+  WiFiManager wifiManager; //default custom static IP
 
   //reset saved settings
   //wifiManager.resetSettings();
@@ -187,7 +187,7 @@ void setup() {
     Serial.println(max_light);
 
     mqttClient.begin(mqtt_server, netClient);
-    Serial.print("\nconnecting to MQTT...");
+    Serial.print("\nOn the Setup()! connecting to MQTT...");
     while (!mqttClient.connect("window_sensor")) {
       Serial.print(".");
       delay(1000);
@@ -196,6 +196,17 @@ void setup() {
 
 // the loop function runs over and over again forever
 void loop() {
+  mqttClient.loop();
+
+  if (!mqttClient.connected()) {
+    mqttClient.connect("window_sensor");
+    Serial.print("\n On the loop()! connecting to MQTT...");
+    while (!mqttClient.connect("window_sensor")) {
+      Serial.print(".");
+      delay(1000);
+    }
+  }
+
   LightSensor(lightAverage.update(analogRead(AnalogInput)));
   Thermometer();
   WindowSonarSensor();
